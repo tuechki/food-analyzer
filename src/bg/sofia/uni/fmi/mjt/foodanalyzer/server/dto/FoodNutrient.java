@@ -1,6 +1,8 @@
 package bg.sofia.uni.fmi.mjt.foodanalyzer.server.dto;
 
-public class FoodNutrient {
+import java.io.Serializable;
+
+public class FoodNutrient implements Serializable {
     private Nutrient nutrient;
     private String amount;
 }

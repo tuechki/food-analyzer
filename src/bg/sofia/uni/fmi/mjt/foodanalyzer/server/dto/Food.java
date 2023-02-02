@@ -8,13 +8,4 @@ public class Food {
 
     private String gtinUpc;
 
-    private String name;
-
-    private String ingredients;
-
-    private int calories;
-    private int protein;
-    private int lipid;
-    private int carbohydrates;
-    private int fiber;
 }
