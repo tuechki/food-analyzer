@@ -6,8 +6,8 @@ public class UnrecognizedCommandException extends Exception {
 
     public UnrecognizedCommandException(String command) {
         super("The command " + command + "is not supported." + System.lineSeparator() +
-            "The supported commands up to this moment are: " + CommandName.GET_FOOD.getName()
-                                                             + CommandName.GET_FOOD_REPORT.getName()
+            "The supported commands up to this moment are: " + CommandName.GET_FOOD.getName() + ", "
+                                                             + CommandName.GET_FOOD_REPORT.getName() + ", "
                                                              + CommandName.GET_FOOD_BY_BARCODE.getName());
     }
 }
