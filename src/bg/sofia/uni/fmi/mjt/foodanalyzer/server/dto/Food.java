@@ -8,4 +8,12 @@ public class Food {
 
     private String gtinUpc;
 
+
+    public String getFdcId() {
+        return fdcId;
+    }
+
+    public String getGtinUpc() {
+        return gtinUpc;
+    }
 }
