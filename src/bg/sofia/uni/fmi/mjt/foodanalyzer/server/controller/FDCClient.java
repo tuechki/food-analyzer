@@ -17,37 +17,11 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
 public class FDCClient {
-
-    public static void main(String[] args) {
-        FDCClient controller = new FDCClient(HttpClient.newBuilder().build());
-
-        Foods foods;
-        FoodReport foodReport;
-        try {
-            foods = controller.getFood("raffaello treat");
-            foodReport = controller.getFoodReport("2041155");
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
-        } catch (ApiKeyMissingException e) {
-            throw new RuntimeException(e);
-        } catch (FoodRetrievalClientException e) {
-            throw new RuntimeException(e);
-        } catch (NoResultsFoundException e) {
-            throw new RuntimeException(e);
-        } catch (BadRequestException e) {
-            throw new RuntimeException(e);
-        }
-
-        System.out.println(GSON.toJson(foods));
-        for (Food food : foods.getFoods()) {
-            System.out.println(GSON.toJson(food));
-        }
-        System.out.println(GSON.toJson(foodReport));
-    }
     public static final String API_KEY = "LNnSmojdImXMsI09R5bReW4HQHIBBw3wLjwx77IG";
     private static final String API_ENDPOINT_SCHEME = "https";
     private static final String API_ENDPOINT_HOST = "api.nal.usda.gov";
-    private static final String API_ENDPOINT_PATH = "/fdc/v1/foods/search";
+    private static final String API_SEARCH_ENDPOINT_PATH = "/fdc/v1/foods/search";
+    private static final String API_REPORT_ENDPOINT_PATH = "/fdc/v1/food/";
     private static final Gson GSON = new Gson();
 
     private final HttpClient foodHttpClient;
@@ -69,27 +43,21 @@ public class FDCClient {
      *
      * @return Foods object
      *
-     * @throws FoodRetrievalClientException, ApiKeyMissingException, NoResultsFoundException, BadRequestException
+     * @throws FoodRetrievalClientException, ApiKeyMissingException, BadRequestException
      */
     public Foods getFood(String foodName)
         throws URISyntaxException,
                 ApiKeyMissingException,
                 FoodRetrievalClientException,
-                NoResultsFoundException,
                 BadRequestException {
 
-        //Check in Cache
-
-
-
-
         //Then make an API request
-        URI uri = new URI(API_ENDPOINT_SCHEME, API_ENDPOINT_HOST, "/fdc/v1/foods/search",
+        URI uri = new URI(API_ENDPOINT_SCHEME, API_ENDPOINT_HOST, API_SEARCH_ENDPOINT_PATH,
             "query=" + foodName + "&requireAllWords=true" + "&api_key=" + this.apiKey, null);
 
         HttpResponse<String> response = getResponse(uri);
-        if (response != null && response.statusCode() == HttpURLConnection.HTTP_OK) {
 
+        if (response.statusCode() == HttpURLConnection.HTTP_OK) {
             return GSON.fromJson(response.body(), Foods.class);
         }
 
@@ -111,7 +79,7 @@ public class FDCClient {
                FoodRetrievalClientException,
                NoResultsFoundException,
                BadRequestException {
-        URI uri = new URI(API_ENDPOINT_SCHEME, API_ENDPOINT_HOST, "/fdc/v1/food/" + fdcId,
+        URI uri = new URI(API_ENDPOINT_SCHEME, API_ENDPOINT_HOST, API_REPORT_ENDPOINT_PATH + fdcId,
             "nutrients=203&" +
                   "nutrients=204&" +
                   "nutrients=205&" +
@@ -120,10 +88,14 @@ public class FDCClient {
                   "api_key=" + this.apiKey, null);
 
         HttpResponse<String> response = getResponse(uri);
-        if (response != null && response.statusCode() == HttpURLConnection.HTTP_OK) {
-            return GSON.fromJson(response.body(), FoodReport.class);
+
+        if (response.statusCode() == HttpURLConnection.HTTP_NOT_FOUND) {
+            throw new NoResultsFoundException("Could not retrieve any results for this food or id.");
         }
 
+        if (response.statusCode() == HttpURLConnection.HTTP_OK) {
+            return GSON.fromJson(response.body(), FoodReport.class);
+        }
 
         return null;
     }
@@ -137,7 +109,7 @@ public class FDCClient {
      * @throws FoodRetrievalClientException, ApiKeyMissingException, NoResultsFoundException, BadRequestException
      */
     private HttpResponse<String> getResponse(URI uri)
-        throws FoodRetrievalClientException, ApiKeyMissingException, NoResultsFoundException, BadRequestException {
+        throws FoodRetrievalClientException, ApiKeyMissingException, BadRequestException {
         HttpResponse<String> response;
         try {
             HttpRequest request = HttpRequest.newBuilder().uri(uri).build();
@@ -149,10 +121,6 @@ public class FDCClient {
 
         if (response.statusCode() == HttpURLConnection.HTTP_UNAUTHORIZED) {
             throw new ApiKeyMissingException("API key is missing or is incorrect.");
-        }
-
-        if (response.statusCode() == HttpURLConnection.HTTP_NOT_FOUND) {
-            throw new NoResultsFoundException("Could not retrieve any results for this food or id.");
         }
 
         if (response.statusCode() == HttpURLConnection.HTTP_BAD_REQUEST) {
