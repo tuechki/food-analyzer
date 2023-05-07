@@ -6,8 +6,13 @@ import bg.sofia.uni.fmi.mjt.foodanalyzer.server.enums.ArgumentFlag;
 import bg.sofia.uni.fmi.mjt.foodanalyzer.server.exceptions.TooFewArgumentsException;
 import bg.sofia.uni.fmi.mjt.foodanalyzer.server.exceptions.TooManyArgumentsException;
 import bg.sofia.uni.fmi.mjt.foodanalyzer.server.exceptions.WrongArgumentsException;
-import bg.sofia.uni.fmi.mjt.foodanalyzer.server.service.CacheInMemoryStorage;
+import bg.sofia.uni.fmi.mjt.foodanalyzer.server.service.cache.CacheStorage;
+import bg.sofia.uni.fmi.mjt.foodanalyzer.server.service.ZCService;
+import com.google.zxing.ChecksumException;
+import com.google.zxing.FormatException;
+import com.google.zxing.NotFoundException;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -18,9 +23,9 @@ public class GetFoodByBarcode extends AbstractCommand {
     }
 
     @Override
-    public String execute(CacheInMemoryStorage cacheInMemoryStorage, FDCClient fdcClient) throws WrongArgumentsException {
+    public String execute(CacheStorage cacheStorage, FDCClient fdcClient) throws WrongArgumentsException {
         String gtinUpc = getGtinUpc();
-        FoodReport foodReport = cacheInMemoryStorage.getFoodReportByBarcodeIfExists(gtinUpc);
+        FoodReport foodReport = cacheStorage.getFoodReportByBarcodeIfExists(gtinUpc);
 
         if (foodReport != null) {
             return GSON.toJson(foodReport);
@@ -52,13 +57,24 @@ public class GetFoodByBarcode extends AbstractCommand {
             argumentFlagValueMap.put(argumentFlag, argument);
         }
 
-        if (argumentFlagValueMap.containsKey(ArgumentFlag.CODE)) {
-            return argumentFlagValueMap.get(ArgumentFlag.CODE);
+        if (argumentFlagValueMap.containsKey(ArgumentFlag.IMG)) {
+
+            ZCService zcService = new ZCService();
+            try {
+                return zcService.getBarcode(argumentFlagValueMap.get(ArgumentFlag.IMG));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            } catch (NotFoundException e) {
+                throw new RuntimeException(e);
+            } catch (FormatException e) {
+                throw new RuntimeException(e);
+            } catch (ChecksumException e) {
+                throw new RuntimeException(e);
+            }
         }
 
-        if (argumentFlagValueMap.containsKey(ArgumentFlag.IMG)) {
-            //TODO: Image proccessing
-            return null;
+        if (argumentFlagValueMap.containsKey(ArgumentFlag.CODE)) {
+            return argumentFlagValueMap.get(ArgumentFlag.CODE);
         }
 
         throw new WrongArgumentsException();

@@ -7,7 +7,7 @@ import bg.sofia.uni.fmi.mjt.foodanalyzer.server.exceptions.BadRequestException;
 import bg.sofia.uni.fmi.mjt.foodanalyzer.server.exceptions.FoodRetrievalClientException;
 import bg.sofia.uni.fmi.mjt.foodanalyzer.server.exceptions.TooFewArgumentsException;
 import bg.sofia.uni.fmi.mjt.foodanalyzer.server.exceptions.TooManyArgumentsException;
-import bg.sofia.uni.fmi.mjt.foodanalyzer.server.service.CacheInMemoryStorage;
+import bg.sofia.uni.fmi.mjt.foodanalyzer.server.service.cache.CacheStorage;
 
 import java.net.URISyntaxException;
 
@@ -20,9 +20,9 @@ public class GetFood extends AbstractCommand {
     }
 
     @Override
-    public String execute(CacheInMemoryStorage cacheInMemoryStorage, FDCClient fdcClient) {
+    public String execute(CacheStorage cacheStorage, FDCClient fdcClient) {
         String query = getQuery();
-        Foods foods = cacheInMemoryStorage.getFoodIfExists(query);
+        Foods foods = cacheStorage.getFoodIfExists(query);
 
         if (foods != null) {
             return GSON.toJson(foods);
@@ -30,7 +30,7 @@ public class GetFood extends AbstractCommand {
 
         try {
             foods = fdcClient.getFood(query);
-            cacheInMemoryStorage.cacheFoods(query, foods);
+            cacheStorage.cacheFoods(query, foods);
 
             return GSON.toJson(foods);
             //TODO: Collapse these exceptions URISyntaxException | ApiKeyMissingException | from the API into one

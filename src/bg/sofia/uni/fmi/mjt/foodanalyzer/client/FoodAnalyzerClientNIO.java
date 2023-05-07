@@ -8,9 +8,9 @@ import java.util.Scanner;
 
 public class FoodAnalyzerClientNIO {
 
-    private static final int SERVER_PORT = 7777;
+    private static final int SERVER_PORT = 6666;
     private static final String SERVER_HOST = "localhost";
-    private static final int BUFFER_SIZE = 1024;
+    private static final int BUFFER_SIZE = 8196;
 
     private static ByteBuffer buffer = ByteBuffer.allocateDirect(BUFFER_SIZE);
 
@@ -21,33 +21,26 @@ public class FoodAnalyzerClientNIO {
 
             socketChannel.connect(new InetSocketAddress(SERVER_HOST, SERVER_PORT));
 
-            System.out.println("Connected to the server.");
-
             while (true) {
-                System.out.print("Enter message: ");
+                System.out.print("> ");
                 String message = scanner.nextLine(); // read a line from the console
 
                 if ("quit".equals(message)) {
                     break;
                 }
 
-                System.out.println("Sending message <" + message + "> to the server...");
+                buffer.clear();
+                buffer.put(message.getBytes());
+                buffer.flip();
+                socketChannel.write(buffer);
 
-                buffer.clear(); // switch to writing mode
-                buffer.put(message.getBytes()); // buffer fill
-                buffer.flip(); // switch to reading mode
-                socketChannel.write(buffer); // buffer drain
-
-                buffer.clear(); // switch to writing mode
-                socketChannel.read(buffer); // buffer fill
-                buffer.flip(); // switch to reading mode
+                buffer.clear();
+                socketChannel.read(buffer);
+                buffer.flip();
 
                 byte[] byteArray = new byte[buffer.remaining()];
                 buffer.get(byteArray);
-                String reply = new String(byteArray, "UTF-8"); // buffer drain
-
-                // if buffer is a non-direct one, is has a wrapped array and we can get it
-                //String reply = new String(buffer.array(), 0, buffer.position(), "UTF-8"); // buffer drain
+                String reply = new String(byteArray, "UTF-8");
 
                 System.out.println(reply);
             }

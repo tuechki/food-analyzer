@@ -6,11 +6,11 @@ import bg.sofia.uni.fmi.mjt.foodanalyzer.server.exceptions.TooFewArgumentsExcept
 import bg.sofia.uni.fmi.mjt.foodanalyzer.server.exceptions.TooManyArgumentsException;
 import bg.sofia.uni.fmi.mjt.foodanalyzer.server.exceptions.UnrecognizedCommandException;
 import bg.sofia.uni.fmi.mjt.foodanalyzer.server.exceptions.WrongArgumentsException;
-import bg.sofia.uni.fmi.mjt.foodanalyzer.server.service.CacheInMemoryStorage;
+import bg.sofia.uni.fmi.mjt.foodanalyzer.server.service.cache.CacheStorage;
 
 public interface Command {
 
-    String execute(CacheInMemoryStorage cacheInMemoryStorage, FDCClient fdcClient) throws WrongArgumentsException;
+    String execute(CacheStorage cacheStorage, FDCClient fdcClient) throws WrongArgumentsException;
 
     static Command of(String command)
         throws UnrecognizedCommandException, TooFewArgumentsException, TooManyArgumentsException {

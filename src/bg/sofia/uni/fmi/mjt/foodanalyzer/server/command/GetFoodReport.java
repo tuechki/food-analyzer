@@ -8,7 +8,7 @@ import bg.sofia.uni.fmi.mjt.foodanalyzer.server.exceptions.FoodRetrievalClientEx
 import bg.sofia.uni.fmi.mjt.foodanalyzer.server.exceptions.NoResultsFoundException;
 import bg.sofia.uni.fmi.mjt.foodanalyzer.server.exceptions.TooFewArgumentsException;
 import bg.sofia.uni.fmi.mjt.foodanalyzer.server.exceptions.TooManyArgumentsException;
-import bg.sofia.uni.fmi.mjt.foodanalyzer.server.service.CacheInMemoryStorage;
+import bg.sofia.uni.fmi.mjt.foodanalyzer.server.service.cache.CacheStorage;
 
 import java.net.URISyntaxException;
 
@@ -19,9 +19,9 @@ public class GetFoodReport extends AbstractCommand {
     }
 
     @Override
-    public String execute(CacheInMemoryStorage cacheInMemoryStorage, FDCClient fdcClient) {
+    public String execute(CacheStorage cacheStorage, FDCClient fdcClient) {
         String fdcId = getArguments()[0];
-        FoodReport foodReport = cacheInMemoryStorage.getFoodReportIfExists(fdcId);
+        FoodReport foodReport = cacheStorage.getFoodReportIfExists(fdcId);
 
         if (foodReport != null) {
             return GSON.toJson(foodReport);
@@ -29,7 +29,7 @@ public class GetFoodReport extends AbstractCommand {
 
         try {
             foodReport = fdcClient.getFoodReport(fdcId);
-            cacheInMemoryStorage.cacheFoodReport(fdcId, foodReport);
+            cacheStorage.cacheFoodReport(fdcId, foodReport);
 
             return GSON.toJson(foodReport);
         } catch (URISyntaxException | ApiKeyMissingException |
