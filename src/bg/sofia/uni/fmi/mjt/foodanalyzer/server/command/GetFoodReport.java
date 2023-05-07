@@ -1,4 +1,4 @@
-package bg.sofia.uni.fmi.mjt.foodanalyzer.server.commands;
+package bg.sofia.uni.fmi.mjt.foodanalyzer.server.command;
 
 import bg.sofia.uni.fmi.mjt.foodanalyzer.server.controller.FDCClient;
 import bg.sofia.uni.fmi.mjt.foodanalyzer.server.dto.FoodReport;
@@ -8,7 +8,7 @@ import bg.sofia.uni.fmi.mjt.foodanalyzer.server.exceptions.FoodRetrievalClientEx
 import bg.sofia.uni.fmi.mjt.foodanalyzer.server.exceptions.NoResultsFoundException;
 import bg.sofia.uni.fmi.mjt.foodanalyzer.server.exceptions.TooFewArgumentsException;
 import bg.sofia.uni.fmi.mjt.foodanalyzer.server.exceptions.TooManyArgumentsException;
-import bg.sofia.uni.fmi.mjt.foodanalyzer.server.service.cache.CacheStorage;
+import bg.sofia.uni.fmi.mjt.foodanalyzer.server.service.cache.FoodDataCache;
 
 import java.net.URISyntaxException;
 
@@ -19,9 +19,9 @@ public class GetFoodReport extends AbstractCommand {
     }
 
     @Override
-    public String execute(CacheStorage cacheStorage, FDCClient fdcClient) {
+    public String execute(FoodDataCache cacheStorage, FDCClient fdcClient) {
         String fdcId = getArguments()[0];
-        FoodReport foodReport = cacheStorage.getFoodReportIfExists(fdcId);
+        FoodReport foodReport = cacheStorage.getFoodReport(fdcId);
 
         if (foodReport != null) {
             return GSON.toJson(foodReport);
@@ -32,8 +32,14 @@ public class GetFoodReport extends AbstractCommand {
             cacheStorage.cacheFoodReport(fdcId, foodReport);
 
             return GSON.toJson(foodReport);
-        } catch (URISyntaxException | ApiKeyMissingException |
-                 FoodRetrievalClientException | NoResultsFoundException | BadRequestException e) {
+        } catch (URISyntaxException | ApiKeyMissingException e) {
+            LOGGER.log(e.getMessage());
+            return ("There was a problem with the server when processing your request. Please try again later.");
+        } catch (BadRequestException e) {
+            return ("Please check the validity of your arguments. Check for any special characters.");
+        } catch (NoResultsFoundException e) {
+            return String.format("Sorry, no food available with this id %s on the server.",  fdcId);
+        } catch (FoodRetrievalClientException e) {
             return e.getMessage();
         }
     }
