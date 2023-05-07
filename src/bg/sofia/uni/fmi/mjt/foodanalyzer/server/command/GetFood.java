@@ -1,15 +1,17 @@
-package bg.sofia.uni.fmi.mjt.foodanalyzer.server.commands;
+package bg.sofia.uni.fmi.mjt.foodanalyzer.server.command;
 
 import bg.sofia.uni.fmi.mjt.foodanalyzer.server.controller.FDCClient;
-import bg.sofia.uni.fmi.mjt.foodanalyzer.server.dto.Foods;
+import bg.sofia.uni.fmi.mjt.foodanalyzer.server.dto.Food;
 import bg.sofia.uni.fmi.mjt.foodanalyzer.server.exceptions.ApiKeyMissingException;
 import bg.sofia.uni.fmi.mjt.foodanalyzer.server.exceptions.BadRequestException;
 import bg.sofia.uni.fmi.mjt.foodanalyzer.server.exceptions.FoodRetrievalClientException;
+import bg.sofia.uni.fmi.mjt.foodanalyzer.server.exceptions.NoResultsFoundException;
 import bg.sofia.uni.fmi.mjt.foodanalyzer.server.exceptions.TooFewArgumentsException;
 import bg.sofia.uni.fmi.mjt.foodanalyzer.server.exceptions.TooManyArgumentsException;
-import bg.sofia.uni.fmi.mjt.foodanalyzer.server.service.cache.CacheStorage;
+import bg.sofia.uni.fmi.mjt.foodanalyzer.server.service.cache.FoodDataCache;
 
 import java.net.URISyntaxException;
+import java.util.List;
 
 public class GetFood extends AbstractCommand {
 
@@ -20,21 +22,28 @@ public class GetFood extends AbstractCommand {
     }
 
     @Override
-    public String execute(CacheStorage cacheStorage, FDCClient fdcClient) {
+    public String execute(FoodDataCache cacheStorage, FDCClient fdcClient) {
         String query = getQuery();
-        Foods foods = cacheStorage.getFoodIfExists(query);
+        List<Food> foods = cacheStorage.getFoods(query);
 
         if (foods != null) {
             return GSON.toJson(foods);
         }
 
         try {
-            foods = fdcClient.getFood(query);
+            foods = fdcClient.getFoods(query);
             cacheStorage.cacheFoods(query, foods);
 
             return GSON.toJson(foods);
-            //TODO: Collapse these exceptions URISyntaxException | ApiKeyMissingException | from the API into one
-        } catch (URISyntaxException | ApiKeyMissingException | FoodRetrievalClientException | BadRequestException e) {
+
+        } catch (URISyntaxException | ApiKeyMissingException e) {
+            LOGGER.log(e.getMessage());
+            return ("There was a problem with the server when processing your request. Please try again later.");
+        } catch (BadRequestException e) {
+            return ("Please check the validity of your arguments. Check for any special characters.");
+        } catch (NoResultsFoundException e) {
+            return String.format("Sorry, no foods available for this query %s on the server.", getQuery());
+        } catch (FoodRetrievalClientException e) {
             return e.getMessage();
         }
     }
@@ -44,7 +53,6 @@ public class GetFood extends AbstractCommand {
         return 1;
     }
 
-    //TODO: Make it or them constants
     @Override
     protected int getMaxArg() {
         return MAX_ARG;
