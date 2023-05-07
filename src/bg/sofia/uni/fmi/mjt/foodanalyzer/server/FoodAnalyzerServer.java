@@ -1,12 +1,12 @@
 package bg.sofia.uni.fmi.mjt.foodanalyzer.server;
 
-import bg.sofia.uni.fmi.mjt.foodanalyzer.server.commands.Command;
+import bg.sofia.uni.fmi.mjt.foodanalyzer.server.command.Command;
 import bg.sofia.uni.fmi.mjt.foodanalyzer.server.controller.FDCClient;
 import bg.sofia.uni.fmi.mjt.foodanalyzer.server.exceptions.TooFewArgumentsException;
 import bg.sofia.uni.fmi.mjt.foodanalyzer.server.exceptions.TooManyArgumentsException;
-import bg.sofia.uni.fmi.mjt.foodanalyzer.server.exceptions.UnrecognizedCommandException;
-import bg.sofia.uni.fmi.mjt.foodanalyzer.server.exceptions.WrongArgumentsException;
-import bg.sofia.uni.fmi.mjt.foodanalyzer.server.service.CacheInMemoryStorage;
+import bg.sofia.uni.fmi.mjt.foodanalyzer.server.exceptions.UnsupportedCommandException;
+import bg.sofia.uni.fmi.mjt.foodanalyzer.server.exceptions.WrongBarcodeArgumentsException;
+import bg.sofia.uni.fmi.mjt.foodanalyzer.server.service.cache.FoodDataCache;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -20,9 +20,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 
 public class FoodAnalyzerServer {
-    private static final int BUFFER_SIZE = 1024;
+    private static final int BUFFER_SIZE = 8192;
     private static final String HOST = "localhost";
-    private final CacheInMemoryStorage cacheInMemoryStorage;
+    private final FoodDataCache cacheStorage;
     private final FDCClient fdcClient;
     private final int port;
     private boolean isServerWorking;
@@ -30,9 +30,9 @@ public class FoodAnalyzerServer {
     private ByteBuffer buffer;
     private Selector selector;
 
-    public FoodAnalyzerServer(int port, CacheInMemoryStorage cacheInMemoryStorage, FDCClient fdcClient) {
+    public FoodAnalyzerServer(int port, FoodDataCache cacheStorage, FDCClient fdcClient) {
         this.port = port;
-        this.cacheInMemoryStorage = cacheInMemoryStorage;
+        this.cacheStorage = cacheStorage;
         this.fdcClient = fdcClient;
     }
 
@@ -55,18 +55,17 @@ public class FoodAnalyzerServer {
                         if (key.isReadable()) {
                             SocketChannel clientChannel = (SocketChannel) key.channel();
                             String clientInput = getClientInput(clientChannel);
-                            System.out.println(clientInput);
                             if (clientInput == null) {
                                 continue;
                             }
 
                             try {
                                 Command command = Command.of(clientInput);
-                                String output = command.execute(cacheInMemoryStorage, fdcClient);
+                                String output = command.execute(cacheStorage, fdcClient);
 
                                 writeClientOutput(clientChannel, output);
-                            } catch (UnrecognizedCommandException | TooFewArgumentsException |
-                                     TooManyArgumentsException | WrongArgumentsException e) {
+                            } catch (UnsupportedCommandException | TooFewArgumentsException |
+                                     TooManyArgumentsException | WrongBarcodeArgumentsException e) {
                                 writeClientOutput(clientChannel, e.getMessage());
                             }
 
@@ -82,7 +81,7 @@ public class FoodAnalyzerServer {
                 }
             }
         } catch (IOException e) {
-            throw new UncheckedIOException("failed to start server", e);
+            throw new UncheckedIOException("Failed to start server", e);
         }
     }
 
@@ -120,7 +119,6 @@ public class FoodAnalyzerServer {
         buffer.clear();
         buffer.put(output.getBytes());
         buffer.flip();
-
         clientChannel.write(buffer);
     }
 
