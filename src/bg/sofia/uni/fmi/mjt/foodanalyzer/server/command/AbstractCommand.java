@@ -1,13 +1,15 @@
-package bg.sofia.uni.fmi.mjt.foodanalyzer.server.commands;
+package bg.sofia.uni.fmi.mjt.foodanalyzer.server.command;
 
 import bg.sofia.uni.fmi.mjt.foodanalyzer.server.exceptions.TooFewArgumentsException;
 import bg.sofia.uni.fmi.mjt.foodanalyzer.server.exceptions.TooManyArgumentsException;
+import bg.sofia.uni.fmi.mjt.foodanalyzer.server.service.Logger;
 import com.google.gson.Gson;
 
 import java.util.Arrays;
 
 public abstract class AbstractCommand implements Command {
 
+    protected static final Logger LOGGER = Logger.getInstance();
     protected static final Gson GSON = new Gson();
     private String command;
     private String[] arguments;
