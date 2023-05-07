@@ -1,11 +1,9 @@
-package bg.sofia.uni.fmi.mjt.foodanalyzer;
+package bg.sofia.uni.fmi.mjt.foodanalyzer.server.controller;
 
 
-import bg.sofia.uni.fmi.mjt.foodanalyzer.server.controller.FDCClient;
 import bg.sofia.uni.fmi.mjt.foodanalyzer.server.dto.Food;
 import bg.sofia.uni.fmi.mjt.foodanalyzer.server.dto.FoodNutrient;
 import bg.sofia.uni.fmi.mjt.foodanalyzer.server.dto.FoodReport;
-import bg.sofia.uni.fmi.mjt.foodanalyzer.server.dto.Foods;
 import bg.sofia.uni.fmi.mjt.foodanalyzer.server.dto.Nutrient;
 import bg.sofia.uni.fmi.mjt.foodanalyzer.server.enums.NutrientName;
 import bg.sofia.uni.fmi.mjt.foodanalyzer.server.enums.Unit;
@@ -13,7 +11,6 @@ import bg.sofia.uni.fmi.mjt.foodanalyzer.server.exceptions.ApiKeyMissingExceptio
 import bg.sofia.uni.fmi.mjt.foodanalyzer.server.exceptions.BadRequestException;
 import bg.sofia.uni.fmi.mjt.foodanalyzer.server.exceptions.FoodRetrievalClientException;
 import bg.sofia.uni.fmi.mjt.foodanalyzer.server.exceptions.NoResultsFoundException;
-import com.google.gson.Gson;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -271,81 +268,5 @@ public class FDCClientTest {
             }
             """;
     }
-
-
-
-
-
-
-
-    //        private static Set<Arguments> provideFdcClientMethods() {
-//            return Set.of(
-//                Arguments.of(new Executable() {
-//                    @Override
-//                    public void execute() throws Throwable {
-//                        fdcClientMock.getFoodReport(FDC_ID);
-//                    }
-//                }),
-//                Arguments.of(new Executable() {
-//                    @Override
-//                    public void execute() throws Throwable {
-//                        fdcClientMock.getFood(FDC_ID);
-//                    }
-//                })
-//            );
-//        }
-//
-//    @ParameterizedTest
-//    @MethodSource("provideFdcClientMethods")
-
-
-
-
-
-
-    @Test
-    public void testGetFoodReportValid() throws URISyntaxException, IOException, InterruptedException {
-
-//        HttpResponse<String> response = mock(HttpResponse.class);
-//        when(response.statusCode()).thenReturn(401);
-//
-//        String fdcId = "666666";
-//
-//        URI uri = new URI(API_ENDPOINT_SCHEME, API_ENDPOINT_HOST, API_REPORT_ENDPOINT_PATH + fdcId,
-//            "nutrients=203&" +
-//                "nutrients=204&" +
-//                "nutrients=205&" +
-//                "nutrients=291&" +
-//                "nutrients=208&" +
-//                "api_key=" + API_KEY, null);
-//        HttpRequest request = HttpRequest.newBuilder().uri(uri).build();
-//        when(fdcHttpClientMock.send(any(HttpRequest.class), any(HttpResponse.BodyHandlers.ofString().getClass())))
-//            .thenReturn(response);
-//
-//        assertThrows(ApiKeyMissingException.class, () -> fdcClientMock.getFoodReport(fdcId),
-//            "ApiKeyMissingException expected to be thrown when API Service respond with status code 401.");
-
-//        assertEquals(11.1, exchange.exchangeSum(Currency.EUR, Currency.USD, 10), 0.001,
-//            "Currency exchange of EUR to USD should work properly");
-//
-//        verify(currencyConverterMock).getExchangeRate(Currency.EUR, Currency.USD);
-//        verify(currencyConverterMock, times(1)).getExchangeRate(Currency.EUR, Currency.USD);
-        // uncomment the next line to play with mock verification failure
-        //verify(currencyConverterMock).getExchangeRate(Currency.EUR, Currency.BGN);
-    }
-
-//    @Test
-//    public void testCurrencyExchangeUnknownCurrencyThrowsException() throws UnknownCurrencyException {
-//
-//        when(currencyConverterMock.getExchangeRate(Currency.BGN, Currency.USD))
-//            .thenThrow(new UnknownCurrencyException(
-//                String.format("Unknown currency pair (%s --> %s)", Currency.BGN, Currency.USD)));
-//
-//        assertThrows(UnknownCurrencyException.class, () -> exchange.exchangeSum(Currency.BGN, Currency.USD, 10),
-//            "UnknownCurrencyException expected to be thrown when converting between currencies one of which is unknown");
-//    }
-
-
-
 
 }
