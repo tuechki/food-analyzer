@@ -15,7 +15,14 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
-public class ZCService {
+public class ZXingService {
+    private static ZXingService instance = new ZXingService();
+    private ZXingService() {
+    }
+
+    public static ZXingService getInstance() {
+        return instance;
+    }
 
     public String getBarcode(String pathToFile)
         throws IOException, NotFoundException, FormatException, ChecksumException {
