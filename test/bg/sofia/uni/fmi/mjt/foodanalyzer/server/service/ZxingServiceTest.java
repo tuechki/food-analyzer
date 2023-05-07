@@ -1,4 +1,4 @@
-package bg.sofia.uni.fmi.mjt.foodanalyzer;
+package bg.sofia.uni.fmi.mjt.foodanalyzer.server.service;
 
 import bg.sofia.uni.fmi.mjt.foodanalyzer.server.service.ZXingService;
 import com.google.zxing.BarcodeFormat;
