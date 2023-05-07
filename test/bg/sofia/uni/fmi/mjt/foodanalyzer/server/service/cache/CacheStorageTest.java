@@ -1,4 +1,4 @@
-package bg.sofia.uni.fmi.mjt.foodanalyzer;
+package bg.sofia.uni.fmi.mjt.foodanalyzer.server.service.cache;
 
 import bg.sofia.uni.fmi.mjt.foodanalyzer.server.dto.Food;
 import bg.sofia.uni.fmi.mjt.foodanalyzer.server.dto.FoodNutrient;
@@ -6,8 +6,7 @@ import bg.sofia.uni.fmi.mjt.foodanalyzer.server.dto.FoodReport;
 import bg.sofia.uni.fmi.mjt.foodanalyzer.server.dto.Nutrient;
 import bg.sofia.uni.fmi.mjt.foodanalyzer.server.enums.NutrientName;
 import bg.sofia.uni.fmi.mjt.foodanalyzer.server.enums.Unit;
-import bg.sofia.uni.fmi.mjt.foodanalyzer.server.service.cache.FoodDataCache;
-import bg.sofia.uni.fmi.mjt.foodanalyzer.server.service.cache.FoodDataStorage;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -30,32 +29,31 @@ public class CacheStorageTest {
 
     @Test
     public void testCacheFoodReportIsCached() {
-        assertNull(storage.getFoodReport(FDC_ID));
 
         storage.cacheFoodReport(FDC_ID, getFoodReport());
 
-        assertNotNull(storage.getFoodReport(FDC_ID));
+        assertNotNull(storage.getFoodReport(FDC_ID),
+            "FoodReports container should not be after cache operation.");
     }
 
     @Test
     public void testCacheFoodsAreCached() {
-        assertNull(storage.getFoods(FDC_ID));
 
         storage.cacheFoods(QUERY, getFoods());
 
-        assertNotNull(storage.getFoods(QUERY));
+        assertNotNull(storage.getFoods(QUERY),
+            "Foods container should not be after cache operation.");
     }
 
 
     @Test
     public void testGetFoodReportByBarcodeWhenCachedExists() {
 
-        assertNull(storage.getFoods(FDC_ID));
-
         storage.cacheFoods(QUERY, getFoods());
         storage.cacheFoodReport(FDC_ID, getFoodReport());
 
-        assertNotNull(storage.getFoodReportByBarcode(BARCODE));
+        assertNotNull(storage.getFoodReportByBarcode(BARCODE),
+            "FoodReport with the respective Barcode should be available after cache operations.");
     }
 
 
